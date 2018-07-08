@@ -4,7 +4,7 @@ Parse variables files in Rust
 ### Usage
 
 ```
-let vars = match parse_vars_file(source) {
+let vars = match parse_vars(source) {
 	Ok(ok) => ok,
 	Err(e) => panic!(e) // Err(e) contains error message as String
 }
