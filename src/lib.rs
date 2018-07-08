@@ -66,6 +66,9 @@ mod vars_parser {
 	{
 		let mut buffer = String::new();
 		let mut fractional: bool = false;
+		if stream.peek() == '-' || stream.peek() == '+' {
+			buffer.push(stream.next());
+		}
 		while stream.peek().is_numeric() || stream.peek() == '.' {
 			if stream.peek() == '.' { fractional = true; }
 			buffer.push(stream.next());
@@ -92,10 +95,10 @@ mod vars_parser {
 			stream.next();
 			return next_token(stream);
 		}
-		if c.is_alphabetic() || c == '_' || c == '-' {
+		if c.is_alphabetic() || c == '_' {
 			return Ok(Token::Name(scan_name(stream)));
 		}
-		if c.is_numeric() || c == '.' {
+		if c.is_numeric() || c == '.' || c == '-' || c == '+' {
 			let num = scan_number(stream);
 			return match num {
 				Number::Integer(n) => Ok(Token::Int_Literal(n)),
@@ -209,7 +212,7 @@ mod vars_parser {
 		Parse_Result::Ok(decl)
 	}
 
-	pub fn parse_vars_file(source: String) -> HashMap<String, Value>
+	pub fn parse_vars_file(source: String) -> Result<HashMap<String, Value>, String>
 	{
 		let mut stream = Stream { stream: &mut source.chars().peekable() };
 		let mut decls: HashMap<String, Value> = HashMap::new();
@@ -218,13 +221,10 @@ mod vars_parser {
 			match result {
 				Parse_Result::Ok(ok) => decls.insert(ok.name, ok.value),
 				Parse_Result::EOF => break,
-				Parse_Result::Err(e) => {
-					println!("{0}", e);
-					break;
-				}
+				Parse_Result::Err(e) => return Err(e)
 			};
 		}
-		decls
+		Ok(decls)
 	}
 
 	#[test]
@@ -233,9 +233,12 @@ mod vars_parser {
 		let source: String = "
 		# Comment
 		variable_str   := \"string literal\"
-		variable_int   := 15
+		variable_int   := -15
 		variable_float := 105.3".to_string();
-		let vars = parse_vars_file(source);
+		let vars = match parse_vars_file(source) {
+			Ok(ok) => ok,
+			Err(e) => panic!(e)
+		};
 		{
 			let key: String = "variable_str".to_string();
 			match vars.get(&key) {
@@ -244,10 +247,10 @@ mod vars_parser {
 						Value::String(s) => {
 							assert_eq!(s, "string literal");
 						},
-						_ => assert!(false)
+						_ => panic!("String literal didn't parse correctly")
 					}
 				},
-				None => assert!(false)
+				None => panic!("Name didn't get parsed correctly")
 			}
 		}
 		{
@@ -256,12 +259,12 @@ mod vars_parser {
 				Some(val) => {
 					match val {
 						Value::Integer(n) => {
-							assert_eq!(*n, 15);
+							assert_eq!(*n, -15);
 						},
-						_ => assert!(false)
+						_ => panic!("Integer literal didn't parse correctly")
 					}
 				},
-				None => assert!(false)
+				None => panic!("Name didn't get parsed correctly")
 			}
 		}
 		{
@@ -272,10 +275,10 @@ mod vars_parser {
 						Value::Float(f) => {
 							assert_eq!(*f, 105.3);
 						},
-						_ => assert!(false)
+						_ => panic!("Float literal didn't parse correctly")
 					}
 				},
-				None => assert!(false)
+				None => panic!("Name didn't get parsed correctly")
 			}
 		}
 	}
