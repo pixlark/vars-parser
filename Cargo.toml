@@ -1,0 +1,6 @@
+[package]
+name = "vars-parser"
+version = "0.1.0"
+authors = ["Paul Tilley <t1000.pixlark@gmail.com>"]
+
+[dependencies]
