@@ -11,9 +11,9 @@ let vars = match parse_vars_file(source) {
 ```
 
 parse_vars_file returns a `HashMap<String, Value>`, where Value is an enum with three possible values:
-* Value::String(String)
-* Value::Integer(i64)
-* Value::Float(f64)
+* `Value::String(String)`
+* `Value::Integer(i64)`
+* `Value::Float(f64)`
 
 ### Example vars file
 
