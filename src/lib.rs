@@ -7,7 +7,9 @@ mod vars_parser {
 	use std::str::Chars;
 	use std::iter::Peekable;
 	use std::collections::HashMap;
-	
+
+	/// Useful wrapper for Peekable<Chars> which returns an EOF char
+	/// when the iterator is empty
 	struct Stream<'a> {
 		stream: &'a mut Peekable<Chars<'a>>,
 	}
@@ -26,7 +28,7 @@ mod vars_parser {
 			self.stream.next().unwrap_or('\0')
 		}
 	}
-
+	
 	#[derive(Debug)]
 	enum Token {
 		EOF,
@@ -37,6 +39,8 @@ mod vars_parser {
 		Float_Literal(f64),
 	}
 
+	/// Pull from stream into buffer until name is terminated or EOF
+	/// reached
 	fn scan_name(stream: &mut Stream) -> String
 	{
 		let mut string = String::new();
@@ -46,6 +50,8 @@ mod vars_parser {
 		return string;
 	}
 
+	/// Pull from stream into buffer until string is terminated or EOF
+	/// reached
 	fn scan_string(stream: &mut Stream) -> String
 	{
 		let mut string = String::new();
@@ -62,6 +68,8 @@ mod vars_parser {
 		Not_A_Number,
 	}
 
+	/// Read int/float from stream. Returns Number::Not_A_Number if
+	/// scanning fails.
 	fn scan_number(stream: &mut Stream) -> Number
 	{
 		let mut buffer = String::new();
@@ -88,6 +96,8 @@ mod vars_parser {
 		}
 	}
 
+	/// Central part of lexer. Advances stream by arbitrary amount
+	/// until the next token is lexed.
 	fn next_token(stream: &mut Stream) -> Result<Token, String>
 	{
 		let c = stream.peek();
@@ -154,6 +164,8 @@ mod vars_parser {
 		value: Value,
 	}
 
+	/// Variation on Result which can specify EOF reached to terminate
+	/// main loop
 	#[derive(Debug)]
 	enum Parse_Result {
 		Ok(Declaration),
@@ -161,6 +173,8 @@ mod vars_parser {
 		EOF,
 	}
 
+	/// Reads arbitrary amount of tokens from next_token() until a new
+	/// declaration is found
 	fn parse_declaration(stream: &mut Stream) -> Parse_Result
 	{
 		let mut decl = Declaration { name: "".to_string(), value: Value::Integer(0) };
@@ -212,7 +226,9 @@ mod vars_parser {
 		Parse_Result::Ok(decl)
 	}
 
-	pub fn parse_vars_file(source: String) -> Result<HashMap<String, Value>, String>
+	/// Reads as many declarations from a source string as it can and
+	/// stores them in a HashMap
+	pub fn parse_vars(source: String) -> Result<HashMap<String, Value>, String>
 	{
 		let mut stream = Stream { stream: &mut source.chars().peekable() };
 		let mut decls: HashMap<String, Value> = HashMap::new();
@@ -235,7 +251,7 @@ mod vars_parser {
 		variable_str   := \"string literal\"
 		variable_int   := -15
 		variable_float := 105.3".to_string();
-		let vars = match parse_vars_file(source) {
+		let vars = match parse_vars(source) {
 			Ok(ok) => ok,
 			Err(e) => panic!(e)
 		};
