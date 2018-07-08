@@ -40,7 +40,7 @@ mod vars_parser {
 	fn scan_name(stream: &mut Stream) -> String
 	{
 		let mut string = String::new();
-		while !stream.peek().is_whitespace() && stream.peek() != '\0' {
+		while !stream.peek().is_whitespace() && stream.peek() != ':' && stream.peek() != '\0' {
 			string.push(stream.next());
 		}
 		return string;
