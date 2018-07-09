@@ -255,44 +255,24 @@ fn test_parsing()
 	};
 	{
 		let key: String = "variable_str".to_string();
-		match vars.get(&key) {
-			Some(val) => {
-				match val {
-					Value::String(s) => {
-						assert_eq!(s, "string literal");
-					},
-					_ => panic!("String literal didn't parse correctly")
-				}
-			},
-			None => panic!("Name didn't get parsed correctly")
+		match vars.get(&key).expect("Name didn't get parsed correctly") {
+			Value::String(s) => assert_eq!(s, "string literal"),
+			_ => panic!("String literal didn't parse correctly")
 		}
 	}
 	{
 		let key: String = "variable_int".to_string();
-		match vars.get(&key) {
-			Some(val) => {
-				match val {
-					Value::Integer(n) => {
-						assert_eq!(*n, -15);
-					},
-					_ => panic!("Integer literal didn't parse correctly")
-				}
-			},
-			None => panic!("Name didn't get parsed correctly")
+		match vars.get(&key).expect("Name didn't get parsed correctly") {
+			Value::Integer(n) => assert_eq!(*n, -15),
+			_ => panic!("Integer literal didn't parse correctly")
 		}
+
 	}
 	{
 		let key: String = "variable_float".to_string();
-		match vars.get(&key) {
-			Some(val) => {
-				match val {
-					Value::Float(f) => {
-						assert_eq!(*f, 105.3);
-					},
-					_ => panic!("Float literal didn't parse correctly")
-				}
-			},
-			None => panic!("Name didn't get parsed correctly")
+		match vars.get(&key).expect("Name didn't get parsed correctly") {
+			Value::Float(f) => assert_eq!(*f, 105.3),
+			_ => panic!("Float literal didnt' parse correctly")
 		}
 	}
 }
